@@ -27,18 +27,29 @@ st.markdown("<h1>🚗 Car Issue Predictor</h1>", unsafe_allow_html=True)
 VEC = "vectorizer.pkl"
 MOD = "model.pkl"
 
-# Fallback paths
 if not os.path.exists(VEC): VEC = "./vectorizer.pkl"
 if not os.path.exists(MOD): MOD = "./model.pkl"
 
-try:
-    vectorizer = joblib.load(VEC)
-    model = joblib.load(MOD)
-except Exception as e:
-    st.error("❌ Model or vectorizer not found. Ensure both files exist.")
-    st.stop()
+vectorizer = joblib.load(VEC)
+model = joblib.load(MOD)
 
-# -------------------- USER INPUT --------------------
+# -------------------- SUGGESTED ACTIONS --------------------
+SUGGESTIONS = {
+    "Weak battery": "Check battery voltage, clean terminals, try jump start. Replace if old.",
+    "Faulty spark plug": "Check spark plugs & wiring. Replace worn plugs.",
+    "Brake issue": "Inspect brake pads, discs, and fluid level. Avoid high speed driving.",
+    "Radiator leak": "Check coolant level, hoses, radiator cap. Stop driving if overheating.",
+    "Unbalanced wheels": "Get wheel balancing and alignment at a workshop.",
+    "Alternator issue": "Check charging system. Look for battery warning light.",
+    "Fuel pump problem": "Check fuel pressure. Avoid running with low fuel.",
+    "Engine overheating": "Check coolant, radiator fan, thermostat.",
+    "Gearbox issue": "Check transmission oil level. Drive gently and visit workshop.",
+    "Suspension issue": "Drive slowly over bumps. Inspect shock absorbers.",
+}
+
+DEFAULT_SUGGESTION = "Visit a workshop for diagnosis."
+
+# -------------------- INPUT --------------------
 st.subheader("Describe the car issue:")
 text = st.text_area("Eg: engine cranks but won’t start, burning smell, vibration…", height=150)
 
@@ -47,38 +58,39 @@ if st.button("🔍 Predict Issue"):
 
     text = text.strip()
 
-    # Basic check
     if len(text) < 3:
         st.error("❌ Please enter a valid complaint.")
         st.stop()
 
-    # Vectorize
     vec = vectorizer.transform([text])
     nnz = vec.nnz
 
-    # Reject nonsense
     if nnz < 2:
         st.error("❌ Input too vague or contains unknown words. Describe real symptoms.")
         st.stop()
 
-    # Probability prediction
     probs = model.predict_proba(vec)[0]
     best_index = np.argmax(probs)
     best_class = model.classes_[best_index]
     best_prob = probs[best_index]
 
-    # Confidence threshold
     if best_prob < 0.45:
         st.error("❌ Low confidence. Please add more details.")
         st.stop()
 
-    # MAIN RESULT
+    # ---------------- RESULT ----------------
     st.success(f"🔧 Likely Issue: **{best_class}** ({best_prob*100:.1f}%)")
 
+    # Suggested action
+    suggestion = SUGGESTIONS.get(best_class, DEFAULT_SUGGESTION)
 
-    # ---------------- TOP 3 PREDICTIONS ----------------
+    st.info(f"🛠️ Suggested Action: **{suggestion}**")
+
+    # ---------------- TOP 3 ----------------
     st.markdown("### 🔝 Top 3 Possible Issues:")
     top3 = probs.argsort()[::-1][:3]
 
     for i in top3:
-        st.write(f"• {model.classes_[i]} ({probs[i]*100:.1f}%)")
+        c = model.classes_[i]
+        p = probs[i] * 100
+        st.write(f"• {c} ({p:.1f}%)")
