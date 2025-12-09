@@ -21,7 +21,7 @@ h3{{color:white;}}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🚗 Car Issue Predictor</h1>", unsafe_allow_html=True)
+st.markdown("<h1>CAR ISSUE PREDICTOR</h1>", unsafe_allow_html=True)
 
 # -------------------- LOAD MODEL --------------------
 VEC = "vectorizer.pkl"
