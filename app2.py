@@ -87,11 +87,12 @@ if st.button("🔍 Predict Issue"):
     st.info(f"🛠️ Suggested Action: **{suggestion}**")
 
     
-    st.markdown("### 🔝 Top 3 Possible Issues:")
+    st.markdown("### 🔝 Top 2 Possible Issues:")
     top3 = probs.argsort()[::-1][:2]
 
     for i in top3:
         c = model.classes_[i]
         p = probs[i] * 100
         st.write(f"• {c} ({p:.1f}%)")
+
 
