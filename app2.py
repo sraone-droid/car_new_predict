@@ -3,7 +3,7 @@ import joblib
 import numpy as np
 import os
 
-# -------------------- PAGE UI --------------------
+
 st.set_page_config(page_title="Car Issue Predictor", layout="centered")
 
 BACKGROUND = "https://cdn.dribbble.com/userupload/22797976/file/original-3b362f19987e09fbeb2b092dc029db17.gif"
@@ -23,7 +23,7 @@ h3{{color:white;}}
 
 st.markdown("<h1>CAR ISSUE PREDICTOR</h1>", unsafe_allow_html=True)
 
-# -------------------- LOAD MODEL --------------------
+
 VEC = "vectorizer.pkl"
 MOD = "model.pkl"
 
@@ -33,7 +33,7 @@ if not os.path.exists(MOD): MOD = "./model.pkl"
 vectorizer = joblib.load(VEC)
 model = joblib.load(MOD)
 
-# -------------------- SUGGESTED ACTIONS --------------------
+
 SUGGESTIONS = {
     "Weak battery": "Check battery voltage, clean terminals, try jump start. Replace if old.",
     "Faulty spark plug": "Check spark plugs & wiring. Replace worn plugs.",
@@ -49,11 +49,11 @@ SUGGESTIONS = {
 
 DEFAULT_SUGGESTION = "Visit a workshop for diagnosis."
 
-# -------------------- INPUT --------------------
+
 st.subheader("Describe the car issue:")
 text = st.text_area("Eg: engine cranks but won’t start, burning smell, vibration…", height=150)
 
-# -------------------- PREDICT --------------------
+
 if st.button("🔍 Predict Issue"):
 
     text = text.strip()
@@ -78,7 +78,7 @@ if st.button("🔍 Predict Issue"):
         st.error("❌ Low confidence. Please add more details.")
         st.stop()
 
-    # ---------------- RESULT ----------------
+    
     st.success(f"🔧 Likely Issue: **{best_class}** ({best_prob*100:.1f}%)")
 
     # Suggested action
@@ -86,11 +86,12 @@ if st.button("🔍 Predict Issue"):
 
     st.info(f"🛠️ Suggested Action: **{suggestion}**")
 
-    # ---------------- TOP 3 ----------------
+    
     st.markdown("### 🔝 Top 3 Possible Issues:")
-    top3 = probs.argsort()[::-1][:3]
+    top3 = probs.argsort()[::-1][:2]
 
     for i in top3:
         c = model.classes_[i]
         p = probs[i] * 100
         st.write(f"• {c} ({p:.1f}%)")
+
